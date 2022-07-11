@@ -42,4 +42,40 @@ router.post(
 
   router.delete('/restaurant/:restaurantId', adminController.deleteRestaurant);
 
+
+
+
+
+  router.post(
+    '/restaurantAdmin',
+    // [
+    //   body('name')
+    //     .trim()
+    //     .isLength({ min: 3 }),
+    //   body('description')
+    //     .trim()
+    //     .isLength({ min: 5 })
+    // ],
+    adminController.createRestaurantAdmin
+  );
+
+  router.get('/restaurantAdmins', adminController.getRestaurantAdmins);
+
+  router.get('/restaurantAdmin/:restaurantAdminId', adminController.getRestaurantAdmin);
+
+  router.put(
+    '/restaurantAdmin/:restaurantAdminId',
+    // isAuth,
+    // [
+    //   body('title')
+    //     .trim()
+    //     .isLength({ min: 5 }),
+    //   body('content')
+    //     .trim()
+    //     .isLength({ min: 5 })
+    // ],
+    adminController.updateRestaurantAdmin
+  );
+
+  router.delete('/restaurantAdmin/:restaurantAdminId', adminController.deleteRestaurantAdmin);
   module.exports = router;
