@@ -11,7 +11,7 @@ const multer = require('multer');
 
 
 const adminRoutes = require('./routes/admin');
-//const restaurantAdminRoutes = require('./routes/restaurantAdmin');
+const restaurantAdminRoutes = require('./routes/restaurantAdmin');
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 
 
 app.use('/admin', adminRoutes);
-//app.use('/restaurantAdmin', restaurantAdminRoutes);
+app.use('/restaurantAdmin', restaurantAdminRoutes);
 
 
 app.use((error, req, res, next) => {
