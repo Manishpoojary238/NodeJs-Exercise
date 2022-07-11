@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 // const flash = require('connect-flash');
 const multer = require('multer');
 
-
+const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const restaurantAdminRoutes = require('./routes/restaurantAdmin');
 
@@ -17,7 +17,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-
+app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/restaurantAdmin', restaurantAdminRoutes);
 
