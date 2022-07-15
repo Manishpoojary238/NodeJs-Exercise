@@ -2,7 +2,7 @@ const express = require('express');
 const { body } = require('express-validator/check');
 
 const adminController = require('../controllers/admin');
-//const isAuth = require('../middleware/is-auth');
+const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
 
@@ -12,6 +12,7 @@ router.get('/restaurants', adminController.getRestaurants);
 // POST /admin/restaurant
 router.post(
     '/restaurant',
+    isAuth,
     // [
     //   body('name')
     //     .trim()
@@ -23,12 +24,12 @@ router.post(
     adminController.createRestaurant
   );
 
-  router.get('/restaurant/:restaurantId', adminController.getRestaurant);
+  router.get('/restaurant/:restaurantId', isAuth,  adminController.getRestaurant);
 
 
   router.put(
     '/restaurant/:restaurantId',
-    // isAuth,
+    isAuth,
     // [
     //   body('title')
     //     .trim()
@@ -40,7 +41,7 @@ router.post(
     adminController.updateRestaurant
   );
 
-  router.delete('/restaurant/:restaurantId', adminController.deleteRestaurant);
+  router.delete('/restaurant/:restaurantId', isAuth, adminController.deleteRestaurant);
 
 
 
@@ -48,6 +49,7 @@ router.post(
 
   router.post(
     '/restaurantAdmin',
+    isAuth,
     // [
     //   body('name')
     //     .trim()
@@ -59,13 +61,13 @@ router.post(
     adminController.createRestaurantAdmin
   );
 
-  router.get('/restaurantAdmins', adminController.getRestaurantAdmins);
+  router.get('/restaurantAdmins', isAuth, adminController.getRestaurantAdmins);
 
-  router.get('/restaurantAdmin/:restaurantAdminId', adminController.getRestaurantAdmin);
+  router.get('/restaurantAdmin/:restaurantAdminId', isAuth, adminController.getRestaurantAdmin);
 
   router.put(
     '/restaurantAdmin/:restaurantAdminId',
-    // isAuth,
+    isAuth,
     // [
     //   body('title')
     //     .trim()
@@ -77,5 +79,5 @@ router.post(
     adminController.updateRestaurantAdmin
   );
 
-  router.delete('/restaurantAdmin/:restaurantAdminId', adminController.deleteRestaurantAdmin);
+  router.delete('/restaurantAdmin/:restaurantAdminId', isAuth,  adminController.deleteRestaurantAdmin);
   module.exports = router;

@@ -2,16 +2,17 @@ const express = require('express');
 const { body } = require('express-validator/check');
 
 const restaurantAdminController = require('../controllers/restaurantAdmin');
-//const isAuth = require('../middleware/is-auth');
+const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
 
 // GET /restaurantAdmin/Foods
-router.get('/foods', restaurantAdminController.getFoods);
+router.get('/foods', isAuth, restaurantAdminController.getFoods);
 
 // POST /restaurantAdmin/food
 router.post(
   '/food',
+  isAuth,
   // [
   //   body('name')
   //     .trim()
@@ -23,12 +24,12 @@ router.post(
   restaurantAdminController.createFood
 );
 
-router.get('/food/:foodId', restaurantAdminController.getFood);
+router.get('/food/:foodId', isAuth, restaurantAdminController.getFood);
 
 
   router.put(
     '/food/:foodId',
-    // isAuth,
+     isAuth,
     // [
     //   body('title')
     //     .trim()
@@ -41,6 +42,6 @@ router.get('/food/:foodId', restaurantAdminController.getFood);
   );
 
 
-router.delete('/food/:foodId', restaurantAdminController.deleteFood);
+router.delete('/food/:foodId', isAuth, restaurantAdminController.deleteFood);
 
 module.exports = router;

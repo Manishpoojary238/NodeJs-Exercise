@@ -4,7 +4,8 @@ const path = require('path');
 const { validationResult } = require('express-validator/check');
 
 const Food = require('../models/food');
-//const User = require('../models/user');
+const Restaurant = require('../models/restaurant');
+const restaurant = require('../models/restaurant');
 
 
 exports.getFoods = (req, res, next) => {
@@ -53,28 +54,31 @@ exports.getFoods = (req, res, next) => {
     const name = req.body.name;
     const description = req.body.description;
     const price = req. body.price;
-    //let creator;
+    const restaurantId = req.body.restaurantId
+    let restaurant;
     const food = new Food({
       name: name,
       description: description,
       imageUrl: imageUrl,
-      price: price
+      price: price,
+      restaurantId: restaurantId
       //creator: req.userId
     });
     food
       .save()
-    //   .then(result => {
-    //     return User.findById(req.userId);
-    //   })
-    //   .then(user => {
-    //     creator = user;
-    //     user.posts.push(post);
-    //     return user.save();
-    //   })
+      .then(result => {
+        return Restaurant.findById(restaurantId);
+      })
+      .then(restaurant => {
+        restaurant = restaurant;
+        restaurant.foods.push(food);
+        return restaurant.save();
+      })
       .then(result => {
         res.status(201).json({
           message: 'Food added successfully!',
           food: food,
+          //restaurant: {  name: restaurant.name }
           //creator: { _id: creator._id, name: creator.name }
         });
       })
@@ -109,6 +113,7 @@ exports.getFoods = (req, res, next) => {
 
   exports.updateFood = (req, res, next) => {
     const foodId = req.params.foodId;
+    //const restaurantId = req.params.restaurantId;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error('Validation failed, entered data is incorrect.');
@@ -119,6 +124,7 @@ exports.getFoods = (req, res, next) => {
     const description = req.body.description;
     let imageUrl = req.body.imageUrl;
     const price = req.body.price;
+    const restaurantId = req.body.restaurantId;
     // if (req.file) {
     //   imageUrl = req.file.path.replace("\\","/");
     // }
@@ -146,6 +152,7 @@ exports.getFoods = (req, res, next) => {
         food.imageUrl = imageUrl;
         food.description = description;
         food.price = price;
+        food.restaurantId = restaurantId;
         return food.save();
       })
       .then(result => {
@@ -162,6 +169,7 @@ exports.getFoods = (req, res, next) => {
 
   exports.deleteFood = (req, res, next) => {
     const foodId = req.params.foodId;
+    let restaurantId;
     Food.findById(foodId)
       .then(food => {
         if (!food) {
@@ -177,15 +185,16 @@ exports.getFoods = (req, res, next) => {
         // Check logged in user
         
         //clearImage(post.imageUrl);
+        restaurantId= food.restaurantId;
         return Food.findByIdAndRemove(foodId);
       })
-      // .then(result => {
-      //   return User.findById(req.userId);
-      // })
-      // .then(user => {
-      //   user.posts.pull(postId);
-      //   return user.save();
-      // })
+      .then(result => {
+        return Restaurant.findById(restaurantId);
+      })
+      .then(restaurant => {
+        restaurant.foods.pull(foodId);
+        return restaurant.save();
+      })
       .then(result => {
         res.status(200).json({ message: 'Deleted food.' });
       })

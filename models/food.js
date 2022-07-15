@@ -19,11 +19,11 @@ const foodSchema = new Schema(
         type: String,
         required: true
     },
-    // creator: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'User',
-    //   required: true
-    // }
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Restaurant',
+      required: true
+    }
   },
   { timestamps: true }
 );

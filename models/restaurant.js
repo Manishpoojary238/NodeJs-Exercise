@@ -19,11 +19,17 @@ const restaurantSchema = new Schema(
         type: String,
         required: true
     },
-    // creator: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'User',
-    //   required: true
-    // }
+    restaurantAdminId: {
+      type: Schema.Types.ObjectId,
+      ref: 'RestaurantAdmin',
+      required: true
+    },
+    foods: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Food'
+      }
+    ]
   },
   { timestamps: true }
 );

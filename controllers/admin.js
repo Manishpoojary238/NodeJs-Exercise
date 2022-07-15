@@ -55,13 +55,14 @@ exports.getRestaurants = (req, res, next) => {
     const name = req.body.name;
     const description = req.body.description;
     const location = req. body.location;
+    const restaurantAdminId =req.body.restaurantAdminId;
     //let creator;
     const restaurant = new Restaurant({
       name: name,
       description: description,
       imageUrl: imageUrl,
-      location: location
-      //creator: req.userId
+      location: location,
+      restaurantAdminId: restaurantAdminId
     });
     restaurant
       .save()
@@ -77,6 +78,7 @@ exports.getRestaurants = (req, res, next) => {
         res.status(201).json({
           message: 'Restaurant added successfully!',
           restaurant: restaurant,
+          //restaurantAdmin: { _id: restaurantAdmin._id, name: restaurantAdmin.name }
           //creator: { _id: creator._id, name: creator.name }
         });
       })
@@ -120,6 +122,7 @@ exports.getRestaurants = (req, res, next) => {
     const description = req.body.description;
     const location = req.body.location;
     let imageUrl = req.body.imageUrl;
+    const restaurantAdminId = req.body.restaurantAdminId;
     // if (req.file) {
     //   imageUrl = req.file.path.replace("\\","/");
     // }
@@ -147,6 +150,7 @@ exports.getRestaurants = (req, res, next) => {
         restaurant.imageUrl = imageUrl;
         restaurant.description = description;
         restaurant.location = location;
+        restaurant.restaurantAdminId = restaurantAdminId;
         return restaurant.save();
       })
       .then(result => {
