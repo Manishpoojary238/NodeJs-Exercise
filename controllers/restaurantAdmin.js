@@ -53,6 +53,7 @@ exports.getFoods = (req, res, next) => {
     const imageUrl=req.body.imageUrl;
     const name = req.body.name;
     const description = req.body.description;
+    const availability = req.body.availability;
     const price = req. body.price;
     const restaurantId = req.body.restaurantId
     let restaurant;
@@ -60,6 +61,7 @@ exports.getFoods = (req, res, next) => {
       name: name,
       description: description,
       imageUrl: imageUrl,
+      availability: availability,
       price: price,
       restaurantId: restaurantId
       //creator: req.userId
@@ -123,6 +125,7 @@ exports.getFoods = (req, res, next) => {
     const name = req.body.name;
     const description = req.body.description;
     let imageUrl = req.body.imageUrl;
+    const availability = req.body.availability;
     const price = req.body.price;
     const restaurantId = req.body.restaurantId;
     // if (req.file) {
@@ -151,6 +154,7 @@ exports.getFoods = (req, res, next) => {
         food.name = name;
         food.imageUrl = imageUrl;
         food.description = description;
+        food.availability = availability;
         food.price = price;
         food.restaurantId = restaurantId;
         return food.save();

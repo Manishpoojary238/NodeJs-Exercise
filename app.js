@@ -15,10 +15,38 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const restaurantAdminRoutes = require('./routes/restaurantAdmin');
 const customerRoutes = require('./routes/customer');
+const deliveryPartnerRoutes = require('./routes/deliveryPartner');
 
 const app = express();
 
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().getTime() + '-' + file.originalname);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
 app.use(bodyParser.json());
+
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
+);
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -54,6 +82,7 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/restaurantAdmin', restaurantAdminRoutes);
 app.use('/customer', customerRoutes);
+app.use('/deliveryPartner', deliveryPartnerRoutes);
 
 
 

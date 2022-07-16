@@ -19,6 +19,10 @@ const orderSchema = new Schema({
       required: true,
       ref: 'User'
     }
+  },
+  orderStatus: {
+    type: String,
+    required: true
   }
 });
 
