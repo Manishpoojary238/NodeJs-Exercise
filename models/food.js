@@ -27,9 +27,31 @@ const foodSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Restaurant',
       required: true
+    },
+    ratings : [],
+    averageRating: {
+      type: Number
     }
+    // ratings: {
+    //   individualRatings: [],
+    //   totalRatings: Number
+    // }
   },
   { timestamps: true }
 );
+
+
+foodSchema.methods.avgRating = function() {
+  let sum = 0;
+  //Food.findById(foodId)
+  
+    for( let i=0; i< this.ratings.length ; i++){
+      sum+= this.ratings[i];
+    }
+    this.averageRating = (sum/this.ratings.length)
+    //return this.save();
+
+}
+
 
 module.exports = mongoose.model('Food', foodSchema);

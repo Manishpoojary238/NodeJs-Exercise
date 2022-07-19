@@ -23,4 +23,6 @@ router.get('/orders', isAuth, customerController.getOrders);
 
 router.delete('/order/:orderId', isAuth, customerController.cancelOrder);
 
+router.post('/food-rating/:foodId', isAuth, customerController.giveFoodRating);
+
 module.exports = router;

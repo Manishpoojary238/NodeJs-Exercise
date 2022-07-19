@@ -25,7 +25,17 @@ const userSchema = new Schema({
         quantity: { type: Number, required: true }
       }
     ]
+  },
+  //foodRatings : []
+  allRatings:{
+    foodRatings: [
+      {
+        foodId: {type :Schema.Types.ObjectId, ref: 'Food', required: true},
+        rating: { type: Number, required: true}
+      }
+    ]
   }
+  
 });
 
 userSchema.methods.addToCart = function(food) {
