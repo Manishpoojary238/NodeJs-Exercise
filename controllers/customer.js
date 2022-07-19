@@ -4,6 +4,7 @@ const path = require('path');
 const { validationResult } = require('express-validator/check');
 
 const Food = require('../models/food');
+const Restaurant = require('../models/restaurant');
 const food = require('../models/food');
 const User = require('../models/user');
 const Order = require('../models/order');
@@ -217,8 +218,6 @@ exports.getFoods = (req, res, next) => {
       D : 4,
       E : 5
     };
-    //const values = Object.values(Rate);
-    
     Food.findById(foodId)
       .then(food => {
         if (!food) {
@@ -226,7 +225,7 @@ exports.getFoods = (req, res, next) => {
           error.statusCode = 404;
           throw error;
         }
-        if(!(foodRating in Object.values(Rate))){
+        if(foodRating!=1 && foodRating!=2 && foodRating!=3 && foodRating!=4 && foodRating!=5){
           const error = new Error('Please enter any rating value from 1 to 5 .');
           error.statusCode = 404;
           throw error;
@@ -247,8 +246,7 @@ exports.getFoods = (req, res, next) => {
               if(food.ratings[j] == oldFoodRating){
                 food.ratings.splice(j,1);
                 food.ratings.push(foodRating);
-                //return food.save();
-                food.avgRating(foodId);
+                food.avgRating();
                 return food.save();
                 //break;
               }
@@ -258,9 +256,71 @@ exports.getFoods = (req, res, next) => {
 
         if(flag !== 1){
           food.ratings.push(foodRating);
-          food.avgRating(foodId);
+          food.avgRating();
           food.save();
           req.user.allRatings.foodRatings.push({"foodId":foodId, "rating": foodRating});
+          return req.user.save();
+        }
+      })
+      .then(result => {
+        res.status(201).json({
+          message: 'Rating submitted'
+        });
+      })
+      .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+  };
+
+
+  exports.giveRestaurantRating = (req, res, next) => {
+    const restaurantId = req.params.restaurantId;
+    const restaurantRating =req.body.restaurantRating;
+    let flag;
+    Restaurant.findById(restaurantId)
+      .then(restaurant => {
+        if (!restaurant) {
+          const error = new Error('Could not find the restaurant.');
+          error.statusCode = 404;
+          throw error;
+        }
+        if(restaurantRating!=1 && restaurantRating!=2 && restaurantRating!=3 && restaurantRating!=4 && restaurantRating!=5){
+          const error = new Error('Please enter any rating value from 1 to 5 .');
+          error.statusCode = 404;
+          throw error;
+        }
+
+        let oldRestaurantRating;
+        userRestaurantRatingArray = req.user.allRatings.restaurantRatings;
+        for(let i=0; i<userRestaurantRatingArray.length; i++){
+          if(userRestaurantRatingArray[i].restaurantId == restaurantId)
+          {
+            //oldFoodRating = userFoodRatingArray[i].rating;
+            oldRestaurantRating =req.user.allRatings.restaurantRatings[i].rating;
+            req.user.allRatings.restaurantRatings[i].rating = restaurantRating;
+            flag = 1;
+            req.user.save();
+
+            for(let j=0;j<restaurant.ratings; j++){
+              if(restaurant.ratings[j] == oldRestaurantRating){
+                restaurant.ratings.splice(j,1);
+                restaurant.ratings.push(restaurantRating);
+                restaurant.avgRating();
+                return restaurant.save();
+                //break;
+              }
+            }
+          }
+        }
+
+        if(flag !== 1){
+          restaurant.ratings.push(restaurantRating);
+          restaurant.avgRating();
+          restaurant.save();
+          req.user.allRatings.restaurantRatings.push({"restaurantId":restaurantId, "rating": restaurantRating});
           return req.user.save();
         }
       })

@@ -33,6 +33,12 @@ const userSchema = new Schema({
         foodId: {type :Schema.Types.ObjectId, ref: 'Food', required: true},
         rating: { type: Number, required: true}
       }
+    ],
+    restaurantRatings: [
+      {
+        restaurantId: {type :Schema.Types.ObjectId, ref: 'Restaurant', required: true},
+        rating: { type: Number, required: true}
+      }
     ]
   }
   

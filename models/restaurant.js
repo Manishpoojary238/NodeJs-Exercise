@@ -29,9 +29,22 @@ const restaurantSchema = new Schema(
         type: Schema.Types.ObjectId,
         ref: 'Food'
       }
-    ]
+    ],
+    ratings : [],
+    averageRating: {
+      type: Number
+    }
   },
   { timestamps: true }
 );
+
+restaurantSchema.methods.avgRating = function() {
+  let sum = 0;
+  for( let i=0; i< this.ratings.length ; i++){
+    sum+= this.ratings[i];
+  }
+  this.averageRating = (sum/this.ratings.length)
+  //return this.save();
+}
 
 module.exports = mongoose.model('Restaurant', restaurantSchema);
