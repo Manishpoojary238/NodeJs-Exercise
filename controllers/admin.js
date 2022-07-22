@@ -1,13 +1,14 @@
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const Admin = require('../models/admin');
 
 const { validationResult } = require('express-validator/check');
 
 const Restaurant = require('../models/restaurant');
 const RestaurantAdmin = require('../models/restaurantAdmin');
-//const restaurant = require('../models/restaurant');
 //const User = require('../models/user');
-
 
 exports.getRestaurants = (req, res, next) => {
     const currentPage = req.query.page || 1;
@@ -44,14 +45,14 @@ exports.getRestaurants = (req, res, next) => {
       error.statusCode = 422;
       throw error;
     }
-    // if (!req.file) {
-    //   const error = new Error('No image provided.');
-    //   error.statusCode = 422;
-    //   throw error;
-    // }
+    if (!req.file) {
+      const error = new Error('No image provided.');
+      error.statusCode = 422;
+      throw error;
+    }
 
-    //const imageUrl = req.file.path.replace("\\","/");
-    const imageUrl=req.body.imageUrl;
+    const imageUrl = req.file.path.replace("\\","/");
+    //const imageUrl=req.body.imageUrl;
     const name = req.body.name;
     const description = req.body.description;
     const location = req. body.location;
@@ -66,14 +67,6 @@ exports.getRestaurants = (req, res, next) => {
     });
     restaurant
       .save()
-    //   .then(result => {
-    //     return User.findById(req.userId);
-    //   })
-    //   .then(user => {
-    //     creator = user;
-    //     user.posts.push(post);
-    //     return user.save();
-    //   })
       .then(result => {
         res.status(201).json({
           message: 'Restaurant added successfully!',
@@ -89,7 +82,6 @@ exports.getRestaurants = (req, res, next) => {
         next(err);
       });
   };
-
 
   exports.getRestaurant = (req, res, next) => {
     const restrauntID = req.params.restaurantId;
@@ -123,9 +115,9 @@ exports.getRestaurants = (req, res, next) => {
     const location = req.body.location;
     let imageUrl = req.body.imageUrl;
     const restaurantAdminId = req.body.restaurantAdminId;
-    // if (req.file) {
-    //   imageUrl = req.file.path.replace("\\","/");
-    // }
+    if (req.file) {
+      imageUrl = req.file.path.replace("\\","/");
+    }
     if (!imageUrl) {
       const error = new Error('No file picked.');
       error.statusCode = 422;
@@ -138,14 +130,9 @@ exports.getRestaurants = (req, res, next) => {
           error.statusCode = 404;
           throw error;
         }
-        // if (post.creator.toString() !== req.userId) {
-        //   const error = new Error('Not authorized!');
-        //   error.statusCode = 403;
-        //   throw error;
-        // }
-        // if (imageUrl !== post.imageUrl) {
-        //   clearImage(post.imageUrl);
-        // }
+        if (imageUrl !== restaurant.imageUrl) {
+          clearImage(restaurant.imageUrl);
+        }
         restaurant.name = name;
         restaurant.imageUrl = imageUrl;
         restaurant.description = description;
@@ -174,78 +161,13 @@ exports.getRestaurants = (req, res, next) => {
           error.statusCode = 404;
           throw error;
         }
-        // if (post.creator.toString() !== req.userId) {
-        //   const error = new Error('Not authorized!');
-        //   error.statusCode = 403;
-        //   throw error;
-        // }
-
         // Check logged in user
 
-        //clearImage(post.imageUrl);
+        clearImage(restaurant.imageUrl);
         return Restaurant.findByIdAndRemove(restaurantId);
       })
-      // .then(result => {
-      //   return User.findById(req.userId);
-      // })
-      // .then(user => {
-      //   user.posts.pull(postId);
-      //   return user.save();
-      // })
       .then(result => {
         res.status(200).json({ message: 'Deleted restaurant.' });
-      })
-      .catch(err => {
-        if (!err.statusCode) {
-          err.statusCode = 500;
-        }
-        next(err);
-      });
-  };
-
-
-
-
-
-
-  exports.createRestaurantAdmin = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new Error('Validation failed, entered data is incorrect.');
-      error.statusCode = 422;
-      throw error;
-    }
-    // if (!req.file) {
-    //   const error = new Error('No image provided.');
-    //   error.statusCode = 422;
-    //   throw error;
-    // }
-
-    //const imageUrl = req.file.path.replace("\\","/");
-    const name = req.body.name;
-    const phone = req.body.phone;
-    //let creator;
-    const restaurantAdmin = new RestaurantAdmin({
-      name: name,
-      phone: phone
-      //creator: req.userId
-    });
-    restaurantAdmin
-      .save()
-    //   .then(result => {
-    //     return User.findById(req.userId);
-    //   })
-    //   .then(user => {
-    //     creator = user;
-    //     user.posts.push(post);
-    //     return user.save();
-    //   })
-      .then(result => {
-        res.status(201).json({
-          message: 'Restaurant admin added successfully!',
-          restaurantAdmin: restaurantAdmin,
-          //creator: { _id: creator._id, name: creator.name }
-        });
       })
       .catch(err => {
         if (!err.statusCode) {
@@ -301,51 +223,6 @@ exports.getRestaurants = (req, res, next) => {
         next(err);
       });
   };
-
-
-  exports.updateRestaurantAdmin = (req, res, next) => {
-    const restaurantAdminId = req.params.restaurantAdminId;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      const error = new Error('Validation failed, entered data is incorrect.');
-      error.statusCode = 422;
-      throw error;
-    }
-    const name = req.body.name;
-    const phone = req.body.phone;
-    // if (req.file) {
-    //   imageUrl = req.file.path.replace("\\","/");
-    // }
-    
-    RestaurantAdmin.findById(restaurantAdminId)
-      .then(restaurantAdmin => {
-        if (!restaurantAdmin) {
-          const error = new Error('Could not find restaurant admin.');
-          error.statusCode = 404;
-          throw error;
-        }
-        // if (post.creator.toString() !== req.userId) {
-        //   const error = new Error('Not authorized!');
-        //   error.statusCode = 403;
-        //   throw error;
-        // }
-        // if (imageUrl !== post.imageUrl) {
-        //   clearImage(post.imageUrl);
-        // }
-        restaurantAdmin.name = name;
-        restaurantAdmin.phone = phone;
-        return restaurantAdmin.save();
-      })
-      .then(result => {
-        res.status(200).json({ message: 'Restaurant admin updated!', restaurantAdmin: result });
-      })
-      .catch(err => {
-        if (!err.statusCode) {
-          err.statusCode = 500;
-        }
-        next(err);
-      });
-  };
   
   exports.deleteRestaurantAdmin = (req, res, next) => {
     const restaurantAdminId = req.params.restaurantAdminId;
@@ -356,24 +233,8 @@ exports.getRestaurants = (req, res, next) => {
           error.statusCode = 404;
           throw error;
         }
-        // if (post.creator.toString() !== req.userId) {
-        //   const error = new Error('Not authorized!');
-        //   error.statusCode = 403;
-        //   throw error;
-        // }
-
-        // Check logged in user
-
-        //clearImage(post.imageUrl);
         return RestaurantAdmin.findByIdAndRemove(restaurantAdminId);
       })
-      // .then(result => {
-      //   return User.findById(req.userId);
-      // })
-      // .then(user => {
-      //   user.posts.pull(postId);
-      //   return user.save();
-      // })
       .then(result => {
         res.status(200).json({ message: 'Deleted restaurant admin.' });
       })
@@ -383,4 +244,79 @@ exports.getRestaurants = (req, res, next) => {
         }
         next(err);
       });
+  };
+
+  exports.signup = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed.');
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
+    const email = req.body.email;
+    const name = req.body.name;
+    const password = req.body.password;
+    bcrypt
+      .hash(password, 12)
+      .then(hashedPw => {
+        const admin = new Admin({
+          email: email,
+          password: hashedPw,
+          name: name
+        });
+        return admin.save();
+      })
+      .then(result => {
+        res.status(201).json({ message: 'User created!', userId: result._id });
+      })
+      .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+  };
+  
+  exports.login = (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    let loadedUser;
+    Admin.findOne({ email: email })
+      .then(admin => {
+        if (!admin) {
+          const error = new Error('A user with this email could not be found.');
+          error.statusCode = 401;
+          throw error;
+        }
+        loadedUser = admin;
+        return bcrypt.compare(password, admin.password);
+      })
+      .then(isEqual => {
+        if (!isEqual) {
+          const error = new Error('Wrong password!');
+          error.statusCode = 401;
+          throw error;
+        }
+        const token = jwt.sign(
+          {
+            email: loadedUser.email,
+            userId: loadedUser._id.toString()
+          },
+          'somesupersecretsecret',
+          { expiresIn: '1h' }
+        );
+        res.status(200).json({ token: token, userId: loadedUser._id.toString() });
+      })
+      .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+  };
+
+  const clearImage = filePath => {
+    filePath = path.join(__dirname, '..', filePath);
+    fs.unlink(filePath, err => console.log(err));
   };

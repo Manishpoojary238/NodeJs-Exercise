@@ -43,8 +43,7 @@ restaurantSchema.methods.avgRating = function() {
   for( let i=0; i< this.ratings.length ; i++){
     sum+= this.ratings[i];
   }
-  this.averageRating = (sum/this.ratings.length)
-  //return this.save();
+  this.averageRating = (sum/this.ratings.length);
 }
 
 module.exports = mongoose.model('Restaurant', restaurantSchema);

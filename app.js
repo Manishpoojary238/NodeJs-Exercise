@@ -3,12 +3,6 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-// const session = require('express-session');
-// const MongoDBStore = require('connect-mongodb-session')(session);
-// const csrf = require('csurf');
-// const flash = require('connect-flash');
-const isAuth = require('./middleware/is-auth');
-const User = require('./models/user');
 const multer = require('multer');
 
 const authRoutes = require('./routes/auth');
@@ -40,52 +34,20 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-app.use(bodyParser.json());
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 );
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'OPTIONS, GET, POST, PUT, PATCH, DELETE'
-  );
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
-
-app.use((req, res, next) => {
-  // throw new Error('Sync Dummy');
-  // if (!req.userId) {
-  //   return next();
-  // }
-  User.findById('62d629d195d76338bc1fe223')
-    .then(user => {
-      if (!user) {
-        return next();
-      }
-      req.user = user;
-      next();
-    })
-    .catch(err => {
-      next(new Error(err));
-    });
-});
-
-
-
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/restaurantAdmin', restaurantAdminRoutes);
 app.use('/customer', customerRoutes);
 app.use('/deliveryPartner', deliveryPartnerRoutes);
-
-
-
 
 app.use((error, req, res, next) => {
     console.log(error);

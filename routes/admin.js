@@ -1,83 +1,80 @@
 const express = require('express');
 const { body } = require('express-validator/check');
+const Admin = require('../models/admin');
 
 const adminController = require('../controllers/admin');
 const isAuth = require('../middleware/is-auth');
+const isUser = require('../middleware/is-user');
 
 const router = express.Router();
 
-// GET /admin/Restaurants
 router.get('/restaurants', adminController.getRestaurants);
 
-// POST /admin/restaurant
 router.post(
     '/restaurant',
     isAuth,
-    // [
-    //   body('name')
-    //     .trim()
-    //     .isLength({ min: 3 }),
-    //   body('description')
-    //     .trim()
-    //     .isLength({ min: 5 })
-    // ],
+    isUser.isAdmin,
+    [
+      body('name')
+        .trim()
+        .isLength({ min: 2 }),
+      body('description')
+        .trim()
+        .isLength({ min: 5 })
+    ],
     adminController.createRestaurant
   );
 
   router.get('/restaurant/:restaurantId', isAuth,  adminController.getRestaurant);
 
-
   router.put(
     '/restaurant/:restaurantId',
     isAuth,
-    // [
-    //   body('title')
-    //     .trim()
-    //     .isLength({ min: 5 }),
-    //   body('content')
-    //     .trim()
-    //     .isLength({ min: 5 })
-    // ],
+    isUser.isAdmin,
+    [
+      body('name')
+        .trim()
+        .isLength({ min: 2 }),
+      body('description')
+        .trim()
+        .isLength({ min: 5 })
+    ],
     adminController.updateRestaurant
   );
 
-  router.delete('/restaurant/:restaurantId', isAuth, adminController.deleteRestaurant);
+  router.delete('/restaurant/:restaurantId', isAuth, isUser.isAdmin, adminController.deleteRestaurant);
 
+  router.get('/restaurantAdmins', isAuth, isUser.isAdmin, adminController.getRestaurantAdmins);
 
+  router.get('/restaurantAdmin/:restaurantAdminId', isAuth, isUser.isAdmin, adminController.getRestaurantAdmin);
 
-
-
-  router.post(
-    '/restaurantAdmin',
-    isAuth,
-    // [
-    //   body('name')
-    //     .trim()
-    //     .isLength({ min: 3 }),
-    //   body('description')
-    //     .trim()
-    //     .isLength({ min: 5 })
-    // ],
-    adminController.createRestaurantAdmin
-  );
-
-  router.get('/restaurantAdmins', isAuth, adminController.getRestaurantAdmins);
-
-  router.get('/restaurantAdmin/:restaurantAdminId', isAuth, adminController.getRestaurantAdmin);
+  router.delete('/restaurantAdmin/:restaurantAdminId', isAuth, isUser.isAdmin, adminController.deleteRestaurantAdmin);
 
   router.put(
-    '/restaurantAdmin/:restaurantAdminId',
-    isAuth,
-    // [
-    //   body('title')
-    //     .trim()
-    //     .isLength({ min: 5 }),
-    //   body('content')
-    //     .trim()
-    //     .isLength({ min: 5 })
-    // ],
-    adminController.updateRestaurantAdmin
+    '/signup',
+    [
+      body('email')
+        .isEmail()
+        .withMessage('Please enter a valid email.')
+        .custom((value, { req }) => {
+          return Admin.findOne({ email: value }).then(userDoc => {
+            if (userDoc) {
+              return Promise.reject('E-Mail address already exists!');
+            }
+          });
+        })
+        .normalizeEmail(),
+      body('password')
+        .trim()
+        .isLength({ min: 5 }),
+      body('name')
+        .trim()
+        .not()
+        .isEmpty()
+    ],
+    adminController.signup
   );
+  
+  router.post('/login', adminController.login);
 
-  router.delete('/restaurantAdmin/:restaurantAdminId', isAuth,  adminController.deleteRestaurantAdmin);
   module.exports = router;

@@ -32,10 +32,6 @@ const foodSchema = new Schema(
     averageRating: {
       type: Number
     }
-    // ratings: {
-    //   individualRatings: [],
-    //   totalRatings: Number
-    // }
   },
   { timestamps: true }
 );

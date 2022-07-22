@@ -5,9 +5,8 @@ const { validationResult } = require('express-validator/check');
 
 const Food = require('../models/food');
 const Restaurant = require('../models/restaurant');
-const food = require('../models/food');
-const User = require('../models/user');
 const Order = require('../models/order');
+
 
 exports.getFoods = (req, res, next) => {
     const currentPage = req.query.page || 1;
@@ -117,10 +116,17 @@ exports.getFoods = (req, res, next) => {
 
 
   exports.postOrder = (req, res, next) => {
+    let cartFoods;
+    let total =0;
     req.user
       .populate('cart.items.foodId')
       .execPopulate()
       .then(user => {
+        cartFoods = user.cart.items;
+        total = 0;
+        cartFoods.forEach(p => {
+          total += p.quantity * p.foodId.price;
+        });
         const foods = user.cart.items.map(i => {
           return { quantity: i.quantity, food: { ...i.foodId._doc } };
         });
@@ -129,6 +135,7 @@ exports.getFoods = (req, res, next) => {
             email: req.user.email,
             userId: req.user
           },
+          totalAmount: total,
           foods: foods,
           orderStatus : "Order placed"
         });
@@ -176,24 +183,8 @@ exports.getFoods = (req, res, next) => {
           error.statusCode = 404;
           throw error;
         }
-        // if (post.creator.toString() !== req.userId) {
-        //   const error = new Error('Not authorized!');
-        //   error.statusCode = 403;
-        //   throw error;
-        // }
-
-        // Check logged in user
-
-        //clearImage(post.imageUrl);
         return Order.findByIdAndRemove(orderId);
       })
-      // .then(result => {
-      //   return User.findById(req.userId);
-      // })
-      // .then(user => {
-      //   user.posts.pull(postId);
-      //   return user.save();
-      // })
       .then(result => {
         res.status(200).json({ message: 'Order Cancelled.' });
       })
@@ -211,13 +202,6 @@ exports.getFoods = (req, res, next) => {
     const foodRating =req.body.foodRating;
     let food;
     let flag;
-    const Rate = {
-      A : 1,
-      B : 2,
-      C : 3,
-      D : 4,
-      E : 5
-    };
     Food.findById(foodId)
       .then(food => {
         if (!food) {
@@ -248,7 +232,6 @@ exports.getFoods = (req, res, next) => {
                 food.ratings.push(foodRating);
                 food.avgRating();
                 return food.save();
-                //break;
               }
             }
           }
@@ -310,7 +293,6 @@ exports.getFoods = (req, res, next) => {
                 restaurant.ratings.push(restaurantRating);
                 restaurant.avgRating();
                 return restaurant.save();
-                //break;
               }
             }
           }
@@ -335,4 +317,31 @@ exports.getFoods = (req, res, next) => {
         }
         next(err);
       });
+  };
+
+
+  exports.search = (req, res, next) => {
+    console.log(req.params.key);
+    //res.send("search done");
+    let data = Food.find(
+      {
+        "$or": [
+          { "name": {$regex:req.params.key}},
+          { "description": {$regex:req.params.key}}
+        ]
+      }
+    )
+    .then(data => {
+      res.status(201).json({
+        message: 'result for the search',
+        data : data
+      });
+    })
+    .catch(err => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+    //res.send(data);
   };

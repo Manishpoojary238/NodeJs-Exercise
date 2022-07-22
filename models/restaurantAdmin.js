@@ -3,19 +3,32 @@ const Schema = mongoose.Schema;
 
 const restaurantAdminSchema = new Schema(
   {
+    email: {
+      type: String,
+      required: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
     name: {
       type: String,
       required: true
     },
-    phone: {
-      type: String,
-      required: true
-    },
-    // creator: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'User',
-    //   required: true
-    // }
+    deliveryRequests:{
+      acceptedRequests: [
+        {
+          orderId: {type :Schema.Types.ObjectId, ref: 'Order', required: true},
+          deliveryPartnerId: { type: Schema.Types.ObjectId, ref: 'DeliveryPartner', required: true}
+        }
+      ],
+      rejectedRequests: [
+        {
+          orderId: {type :Schema.Types.ObjectId, ref: 'Order', required: true},
+          deliveryPartnerId: { type: Schema.Types.ObjectId, ref: 'DeliveryPartner', required: true}
+        }
+      ]
+    }
   },
   { timestamps: true }
 );

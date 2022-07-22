@@ -20,6 +20,10 @@ const orderSchema = new Schema({
       ref: 'User'
     }
   },
+  totalAmount: {
+    type: Number,
+    required: true
+  },
   orderStatus: {
     type: String,
     required: true
